@@ -1,0 +1,6 @@
+name = "curly-leaf-257a"
+compatibility_date = "2026-11-19"
+workers_dev = true
+
+[assets]
+directory = "."
