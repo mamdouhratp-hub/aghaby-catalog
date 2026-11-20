@@ -4,3 +4,4 @@ workers_dev = true
 
 [assets]
 directory = "."
+exclude = ["node_modules/**", ".git/**"]
