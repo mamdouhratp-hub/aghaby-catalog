@@ -953,5 +953,171 @@
         // Start Application on Page Load
         window.onload = initApp;
     </script>
+    
+<style>
+  #aghabyImageViewer {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8,12,7,.94);
+    padding: 18px;
+  }
+
+  #aghabyImageViewer.open {
+    display: flex;
+  }
+
+  #aghabyViewerImage {
+    max-width: 92vw;
+    max-height: 78vh;
+    object-fit: contain;
+    transform-origin: center;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .aghaby-viewer-btn {
+    position: absolute;
+    border: 1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.12);
+    color: white;
+    border-radius: 999px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  #aghabyViewerClose {
+    top: 18px;
+    right: 18px;
+  }
+
+  #aghabyViewerHint {
+    position: absolute;
+    bottom: 18px;
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+    opacity: .85;
+  }
+
+  #catalogContent img {
+    cursor: zoom-in;
+  }
+</style>
+
+<div id="aghabyImageViewer" aria-hidden="true" role="dialog" aria-label="عرض صورة المنتج">
+  <button id="aghabyViewerClose" class="aghaby-viewer-btn" type="button" aria-label="إغلاق">×</button>
+  <img id="aghabyViewerImage" alt="صورة المنتج مكبرة">
+  <div id="aghabyViewerHint">كبّر الصورة بإصبعيك، واضغط × للإغلاق</div>
+</div>
+
+<script>
+(function () {
+  const viewer = document.getElementById('aghabyImageViewer');
+  const viewerImage = document.getElementById('aghabyViewerImage');
+  const closeButton = document.getElementById('aghabyViewerClose');
+  const catalog = document.getElementById('catalogContent');
+
+  if (!viewer || !viewerImage || !closeButton || !catalog) return;
+
+  let scale = 1;
+  let pinchStartDistance = 0;
+
+  function closeViewer() {
+    viewer.classList.remove('open');
+    viewer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    viewerImage.removeAttribute('src');
+    viewerImage.style.transform = 'scale(1)';
+    scale = 1;
+  }
+
+  function openViewer(src, alt) {
+    if (!src) return;
+
+    viewerImage.src = src;
+    viewerImage.alt = alt || 'صورة المنتج مكبرة';
+    scale = 1;
+    viewerImage.style.transform = 'scale(1)';
+
+    viewer.classList.add('open');
+    viewer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  catalog.addEventListener('click', function (event) {
+    const img = event.target.closest('img');
+
+    if (!img || !catalog.contains(img)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    openViewer(img.currentSrc || img.src, img.alt);
+  });
+
+  closeButton.addEventListener('click', closeViewer);
+
+  viewer.addEventListener('click', function (event) {
+    if (event.target === viewer) closeViewer();
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && viewer.classList.contains('open')) {
+      closeViewer();
+    }
+  });
+
+  function distance(a, b) {
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  }
+
+  viewerImage.addEventListener('touchstart', function (event) {
+    if (event.touches.length === 2) {
+      pinchStartDistance = distance(event.touches[0], event.touches[1]);
+    }
+  }, { passive: true });
+
+  viewerImage.addEventListener('touchmove', function (event) {
+    if (event.touches.length === 2 && pinchStartDistance) {
+      const nextDistance = distance(event.touches[0], event.touches[1]);
+
+      scale = Math.max(
+        1,
+        Math.min(4, scale * nextDistance / pinchStartDistance)
+      );
+
+      viewerImage.style.transform = 'scale(' + scale + ')';
+      pinchStartDistance = nextDistance;
+      event.preventDefault();
+    }
+  }, { passive: false });
+
+  viewerImage.addEventListener('touchend', function () {
+    pinchStartDistance = 0;
+  }, { passive: true });
+
+  viewerImage.addEventListener('wheel', function (event) {
+    event.preventDefault();
+
+    scale = Math.max(
+      1,
+      Math.min(4, scale + (event.deltaY < 0 ? 0.15 : -0.15))
+    );
+
+    viewerImage.style.transform = 'scale(' + scale + ')';
+  }, { passive: false });
+
+})();
+</script>
+
 </body>
 </html>
