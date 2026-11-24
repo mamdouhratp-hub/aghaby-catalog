@@ -430,14 +430,23 @@
         let productsData = [...fallbackProductsData];
 
         // Categories Configuration
-        const categories = [
-            { id: 'all', name: 'جميع المنتجات', icon: 'fa-border-all' },
-            { id: 'cheeses', name: 'الأجبان والألبان', icon: 'fa-cheese' },
-            { id: 'honey', name: 'العسل الطبيعي', icon: 'fa-jar' },
-            { id: 'meats', name: 'اللحوم والدواجن', icon: 'fa-drumstick-bite' },
-            { id: 'olives', name: 'الزيتون والمخللات', icon: 'fa-oil-well' },
-            { id: 'oil_ghee', name: 'السمن والزيوت والمؤن', icon: 'fa-bottle-droplet' }
-        ];
+const categories = [
+    { id: 'all', name: 'جميع المنتجات', icon: 'fa-border-all' },
+    { id: 'cheeses', name: 'الأجبان والألبان', icon: 'fa-cheese' },
+    { id: 'honey', name: 'العسل الطبيعي', icon: 'fa-jar' },
+    { id: 'meats', name: 'اللحوم والدواجن', icon: 'fa-drumstick-bite' },
+    { id: 'fish_pickles', name: 'الأسماك والموالح', icon: 'fa-fish' },
+    { id: 'olives', name: 'الزيتون والمخللات', icon: 'fa-oil-well' },
+    { id: 'plant_products', name: 'المنتجات النباتية', icon: 'fa-seedling' },
+    { id: 'oil_ghee', name: 'السمن والزيوت والمؤن', icon: 'fa-bottle-droplet' }
+];
+     
+            
+            
+            
+            
+            
+        
 
         // State Management
         let currentCategory = 'all';
@@ -487,21 +496,67 @@
         }
 
         function mapProductCategory(value, productName) {
-            const raw = String(value || '').trim().toLowerCase();
-            if (['cheeses', 'honey', 'meats', 'olives', 'oil_ghee'].includes(raw)) return raw;
-            const text = (raw + ' ' + String(productName || '').toLowerCase());
-            if (/عسل|honey/.test(text)) return 'honey';
-            if (/لحمه|لحمة|لحم|فراخ|دجاج|بط |سجق|كبد|سمك|meat|chicken|fish/.test(text)) return 'meats';
-            if (/زيتون|مخلل|ليمون معصفر|olive|pickle/.test(text)) return 'olives';
-            if (/جبن|جبنه|جبنة|لبن|قريش|موزاريلا|فيتا|cheese|dairy/.test(text)) return 'cheeses';
-            if (/زيت|سمن|طحينه|طحينة|خل|قهوه|قهوة|بن |مؤن|oil|ghee/.test(text)) return 'oil_ghee';
-            const categoryMap = {
-                'الأجبان والألبان': 'cheeses', 'الاجبان والالبان': 'cheeses',
-                'العسل الطبيعي': 'honey', 'اللحوم والدواجن': 'meats',
-                'الزيتون والمخللات': 'olives', 'السمن والزيوت والمؤن': 'oil_ghee'
-            };
-            return categoryMap[String(value || '').trim()] || 'oil_ghee';
+    const rawValue = String(value || '').trim();
+    const raw = rawValue.toLowerCase();
+
+    const knownCategories = [
+        'cheeses', 'honey', 'meats', 'fish_pickles',
+        'olives', 'plant_products', 'oil_ghee'
+    ];
+
+    if (knownCategories.includes(raw)) return raw;
+
+    const categoryMap = {
+        'الأجبان والألبان': 'cheeses',
+        'الاجبان والالبان': 'cheeses',
+        'العسل الطبيعي': 'honey',
+        'اللحوم والدواجن': 'meats',
+        'الأسماك والموالح': 'fish_pickles',
+        'الاسماك والموالح': 'fish_pickles',
+        'الزيتون والمخللات': 'olives',
+        'المنتجات النباتية': 'plant_products',
+        'منتجات نباتية': 'plant_products',
+        'السمن والزيوت والمؤن': 'oil_ghee'
+    };
+
+    if (categoryMap[rawValue]) return categoryMap[rawValue];
+
+    const text = (raw + ' ' + String(productName || '').toLowerCase());
+
+    if (/فسيخ|رنجة|سردين|ملوحة|سمك|أسماك|اسماك|مملح|fish|herring|sardine/.test(text)) return 'fish_pickles';
+    if (/نباتي|نباتية|بديل نباتي|plant[- ]based|vegan/.test(text)) return 'plant_products';
+    if (/عسل|honey/.test(text)) return 'honey';
+    if (/لحمه|لحمة|لحم|فراخ|دجاج|بط |سجق|كبد|meat|chicken/.test(text)) return 'meats';
+    if (/زيتون|مخلل|ليمون معصفر|olive|pickle/.test(text)) return 'olives';
+    if (/جبن|جبنه|جبنة|لبن|قريش|موزاريلا|فيتا|cheese|dairy/.test(text)) return 'cheeses';
+    if (/زيت|سمن|طحينه|طحينة|خل|قهوه|قهوة|بن |مؤن|oil|ghee/.test(text)) return 'oil_ghee';
+        return 'oil_ghee';
         }
+    
+
+        
+
+
+            
+            
+            
+            
+            
+            
+            
+            
+            
+                
+                
+            
+        
+            
+            
+                
+                
+        
+            
+    
 
         function normalizeSupabaseProduct(row, index) {
             const name = String(firstValue(row, ['name', 'product_name', 'title', 'اسم', 'اسم_المنتج'], '')).trim();
